@@ -1,25 +1,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- ── Internet & Network ──────────────────── -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-
-    <!-- ── Audio recording (voice messages) ───── -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-
-    <!-- ── Camera & Storage ────────────────────── -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29"/>
-
-    <!-- ── Android 13+ media permissions ──────── -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
-
-    <!-- ── Notifications & System ──────────────── -->
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
@@ -53,7 +44,6 @@
             </intent-filter>
         </activity>
 
-        <!-- flutter_local_notifications requires this -->
         <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
             android:exported="false"/>
@@ -71,7 +61,6 @@
             android:value="2"/>
     </application>
 
-    <!-- Required for file_picker & image_picker -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
