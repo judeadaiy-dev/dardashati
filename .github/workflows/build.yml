@@ -48,10 +48,13 @@ jobs:
 
       - name: Regenerate Android native files
         run: |
+          # حذف المجلد القديم للتأكد من نظافة البناء
+          rm -rf android
           flutter create --platforms=android --org com.example .
+          mkdir -p android/app/src/main/kotlin/com/example/dardashati
           printf 'package com.example.dardashati\n\nimport io.flutter.embedding.android.FlutterActivity\n\nclass MainActivity: FlutterActivity()\n' > android/app/src/main/kotlin/com/example/dardashati/MainActivity.kt
-          echo "✅ Done"
-
+          echo "✅ Done regenerating native files"
+          
       - name: Setup Android resources
         run: |
           mkdir -p android/app/src/main/res/values
@@ -150,7 +153,3 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      - name: Print APK info
-        run: |
-          echo "✅ Build completed!"
-          ls -lh build/app/outputs/flutter-apk/
