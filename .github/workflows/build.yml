@@ -13,18 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Checkout code ──────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Setup Java 17 (required for AGP 8+) ───
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # ── 3. Setup Flutter (stable, matches SDK >=3.0.0) ──
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -32,7 +29,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # ── 4. Cache pub packages ─────────────────────
       - name: Cache pub packages
         uses: actions/cache@v4
         with:
@@ -43,29 +39,61 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      # ── 5. Create missing asset dirs ──────────────
       - name: Create asset directories
         run: |
           mkdir -p assets/images
           mkdir -p assets/icons
-          # Create placeholder files so Flutter doesn't fail
           touch assets/images/.gitkeep
           touch assets/icons/.gitkeep
 
-      # ── 6. Get dependencies ───────────────────────
+      - name: Setup Android resources
+        run: |
+          mkdir -p android/app/src/main/res/values
+          mkdir -p android/app/src/main/res/mipmap-mdpi
+          mkdir -p android/app/src/main/res/mipmap-hdpi
+          mkdir -p android/app/src/main/res/mipmap-xhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxhdpi
+          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
+
+          cat > android/app/src/main/res/values/styles.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+                  <item name="android:windowBackground">@android:color/black</item>
+              </style>
+              <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+                  <item name="android:windowBackground">@android:color/black</item>
+              </style>
+          </resources>
+          EOF
+
+          python3 -c "
+          import struct, zlib
+          def png(w,h,color):
+              raw=b''.join(b'\x00'+bytes([color[0],color[1],color[2],255]*w) for _ in range(h))
+              def chunk(t,d):
+                  c=zlib.crc32(t+d)&0xffffffff
+                  return struct.pack('>I',len(d))+t+d+struct.pack('>I',c)
+              return b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))+chunk(b'IDAT',zlib.compress(raw))+chunk(b'IEND',b'')
+          open('ic_launcher.png','wb').write(png(192,192,(89,102,177)))
+          "
+
+          cp ic_launcher.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp ic_launcher.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp ic_launcher.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp ic_launcher.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp ic_launcher.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
       - name: Flutter pub get
         run: flutter pub get
 
-      # ── 7. Analyze code (warnings only, not fail) ─
       - name: Flutter analyze
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
         continue-on-error: true
 
-      # ── 8. Build release APK ─────────────────────
       - name: Build APK (release)
         run: flutter build apk --release --no-shrink
 
-      # ── 9. Upload APK as artifact ─────────────────
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
@@ -73,7 +101,6 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
 
-      # ── 10. Print APK size ────────────────────────
       - name: Print APK info
         run: |
           echo "✅ Build completed!"
