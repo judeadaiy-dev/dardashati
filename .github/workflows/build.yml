@@ -49,6 +49,13 @@ jobs:
       - name: Regenerate Android native files
         run: |
           flutter create --platforms=android --org com.example .
+          cat > android/app/src/main/kotlin/com/example/dardashati/MainActivity.kt << 'EOF'
+          package com.example.dardashati
+
+          import io.flutter.embedding.android.FlutterActivity
+
+          class MainActivity: FlutterActivity()
+          EOF
           echo "✅ Android files regenerated"
 
       - name: Setup Android resources
