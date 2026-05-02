@@ -161,7 +161,7 @@ class SupabaseService {
         .from('messages')
         .select('*, profiles(full_name, avatar_url, username)')
         .eq('room_id', roomId)
-        .is_('deleted_at', null)
+       .isNull('deleted_at')
         .order('created_at', ascending: false)
         .limit(limit);
     return (data as List).map((e) => AppMessage.fromMap(e)).toList();
@@ -174,7 +174,7 @@ class SupabaseService {
         .from('messages')
         .select('*, profiles(full_name, avatar_url, username)')
         .or('and(sender_id.eq.$me,receiver_id.eq.$otherUserId),and(sender_id.eq.$otherUserId,receiver_id.eq.$me)')
-        .is_('deleted_at', null)
+        .isNull('deleted_at')
         .order('created_at', ascending: false)
         .limit(50);
     return (data as List).map((e) => AppMessage.fromMap(e)).toList();
